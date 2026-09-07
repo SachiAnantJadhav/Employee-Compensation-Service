@@ -26,22 +26,26 @@ The service is implemented using **Python Azure Functions** with **Azure SQL Dat
 The application follows a layered structure:
 
 ```text
-Client / Postman
-       |
-       v
-Azure Functions (HTTP APIs)
-       |
-       v
-Service Layer
-       |
-       v
-Repository Layer
-       |
-       v
-mssql-python
-       |
-       v
-Azure SQL Database
+                    Client
+                  /        \
+             Streamlit    Postman
+                  \        /
+                   HTTP API
+                      │
+                      ▼
+              Azure Functions
+                      │
+                      ▼
+               Service Layer
+                      │
+                      ▼
+             Repository Layer
+                      │
+                      ▼
+                mssql-python
+                      │
+                      ▼
+                  Azure SQL
 ```
 
 ### Layers
