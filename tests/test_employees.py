@@ -107,4 +107,50 @@ def test_create_employee_with_null_bonus():
 
     assert employee["bonus"] == 0
     
-    
+def test_patch_employee_salary():
+    service = EmployeeService()
+    employee = service.create_employee({
+        "first_name": "Patch",
+        "last_name": "Test",
+        "department_id": 1,
+        "salary": 1000000,
+        "bonus": 50000,
+        "hire_date": "2026-09-08"
+    })
+
+    employee_id = employee["employee_id"]
+
+    updated = service.patch_employee(
+        employee_id,
+        {
+            "salary": 1200000
+        }
+    )
+
+    assert updated["salary"] == 1200000.0
+    assert updated["first_name"] == "Patch"
+    assert updated["last_name"] == "Test"
+    assert updated["bonus"] == 50000.0   
+
+def test_patch_employee_bonus():
+    service = EmployeeService()
+    employee = service.create_employee({
+        "first_name": "Bonus",
+        "last_name": "Test",
+        "department_id": 1,
+        "salary": 1000000,
+        "bonus": 50000,
+        "hire_date": "2026-09-08"
+    })
+
+    employee_id = employee["employee_id"]
+
+    updated = service.patch_employee(
+        employee_id,
+        {
+            "bonus": 100000
+        }
+    )
+
+    assert updated["bonus"] == 100000.0
+    assert updated["salary"] == 1000000.0

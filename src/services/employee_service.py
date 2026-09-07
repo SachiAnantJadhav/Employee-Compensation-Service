@@ -74,6 +74,44 @@ class EmployeeService:
             raise ValueError("Employee ID must be positive.")
 
         return self.repository.delete_employee(employee_id)
+    
+    def patch_employee(self, employee_id, data):
+        if employee_id <= 0:
+            raise ValueError("Employee ID must be positive.")
+
+        if not data:
+            raise ValueError("At least one field is required for update.")
+
+        allowed_fields = {
+            "first_name",
+            "last_name",
+            "department_id",
+            "salary",
+            "bonus",
+            "hire_date"
+        }
+
+        invalid_fields = set(data.keys()) - allowed_fields
+
+        if invalid_fields:
+            raise ValueError(
+                f"Invalid fields: {', '.join(invalid_fields)}"
+            )
+
+        self._validate_partial_employee_data(data)
+
+        if "bonus" in data and data["bonus"] is None:
+            data["bonus"] = 0
+
+        updated = self.repository.patch_employee(
+            employee_id,
+            data
+        )
+
+        if not updated:
+            return None
+
+        return self.repository.get_employee_by_id(employee_id)
 
     def _validate_employee_data(self, data):
 
@@ -138,4 +176,59 @@ class EmployeeService:
                     "Bonus must be zero or greater."
                 )
         
-        
+    def _validate_partial_employee_data(self, data):
+
+        if "first_name" in data:
+            if not isinstance(data["first_name"], str):
+                raise ValueError("First name must be a string.")
+
+            if not data["first_name"].strip():
+                raise ValueError("First name is required.")
+
+            if len(data["first_name"]) > 50:
+                raise ValueError(
+                    "First name cannot exceed 50 characters."
+                )
+
+        if "last_name" in data:
+            if not isinstance(data["last_name"], str):
+                raise ValueError("Last name must be a string.")
+
+            if not data["last_name"].strip():
+                raise ValueError("Last name is required.")
+
+            if len(data["last_name"]) > 50:
+                raise ValueError(
+                    "Last name cannot exceed 50 characters."
+                )
+
+        if "department_id" in data:
+            if not isinstance(data["department_id"], int):
+                raise ValueError(
+                    "Department ID must be an integer."
+                )
+
+            if data["department_id"] <= 0:
+                raise ValueError(
+                    "Department ID must be positive."
+                )
+
+        if "salary" in data:
+            if not isinstance(data["salary"], (int, float)):
+                raise ValueError("Salary must be a number.")
+
+            if data["salary"] < 0:
+                raise ValueError(
+                    "Salary must be zero or greater."
+                )
+
+        if "bonus" in data:
+            if data["bonus"] is not None:
+                if not isinstance(data["bonus"], (int, float)):
+                    raise ValueError("Bonus must be a number.")
+
+                if data["bonus"] < 0:
+                    raise ValueError(
+                        "Bonus must be zero or greater."
+                    )    
+            

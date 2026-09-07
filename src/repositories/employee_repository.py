@@ -209,3 +209,45 @@ class EmployeeRepository:
 
         finally:
             connection.close()
+    
+    def patch_employee(self, employee_id, updates):
+        connection = get_connection()
+
+        try:
+            cursor = connection.cursor()
+
+            allowed_fields = {
+                "first_name": "FirstName",
+                "last_name": "LastName",
+                "department_id": "DepartmentID",
+                "salary": "Salary",
+                "bonus": "Bonus",
+                "hire_date": "HireDate"
+            }
+
+            set_parts = []
+            parameters = []
+
+            for field, value in updates.items():
+                if field in allowed_fields:
+                    set_parts.append(f"{allowed_fields[field]} = ?")
+                    parameters.append(value)
+
+            if not set_parts:
+                return False
+
+            query = f"""
+                UPDATE Employee
+                SET {", ".join(set_parts)}
+                WHERE EmployeeID = ?
+            """
+
+            parameters.append(employee_id)
+
+            cursor.execute(query, tuple(parameters))
+            connection.commit()
+
+            return cursor.rowcount > 0
+
+        finally:
+            connection.close()

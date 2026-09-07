@@ -420,3 +420,55 @@ def highest_salary(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             mimetype="application/json"
         )
+        
+        
+@app.route(
+    route="employees/{employee_id}",
+    methods=["PATCH"]
+)
+def patch_employee(req: func.HttpRequest) -> func.HttpResponse:
+
+    try:
+        employee_id = int(
+            req.route_params.get("employee_id")
+        )
+
+        data = req.get_json()
+
+        employee = employee_service.patch_employee(
+            employee_id,
+            data
+        )
+
+        if employee is None:
+            return func.HttpResponse(
+                json.dumps({
+                    "error": "Employee not found."
+                }),
+                status_code=404,
+                mimetype="application/json"
+            )
+
+        return func.HttpResponse(
+            json.dumps(employee),
+            status_code=200,
+            mimetype="application/json"
+        )
+
+    except ValueError as e:
+        return func.HttpResponse(
+            json.dumps({
+                "error": str(e)
+            }),
+            status_code=400,
+            mimetype="application/json"
+        )
+
+    except Exception:
+        return func.HttpResponse(
+            json.dumps({
+                "error": "Internal server error."
+            }),
+            status_code=500,
+            mimetype="application/json"
+        )

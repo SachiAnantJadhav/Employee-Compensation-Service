@@ -7,3 +7,4 @@ local.settings.json
 # Azure Storage Emulator / Azurite
 __azurite_db_*.json
 __blobstorage__/
+frontend/.streamlit/secrets.toml
