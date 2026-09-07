@@ -153,7 +153,7 @@ An Azure subscription with access to Azure Functions and Azure SQL Database is a
 ## 6. Clone the Repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/SachiAnantJadhav/Employee-Compensation-Service.git
 cd FUSION_PRACTICES_ASSIGNMENT
 ```
 
@@ -592,4 +592,4 @@ Source code and project files:
 
 **GitHub:**
 
-https://github.com/your-username/FUSION_PRACTICES_ASSIGNMENT
+https://github.com/SachiAnantJadhav/FUSION_PRACTICES_ASSIGNMENT
