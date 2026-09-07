@@ -9,12 +9,20 @@ class EmployeeService:
     def create_employee(self, data):
         self._validate_employee_data(data)
 
+        if "bonus" not in data:
+            bonus = data["salary"] * 0.05
+        else:
+            bonus = data["bonus"]
+
+            if bonus is None:
+                bonus = 0
+
         employee_id = self.repository.create_employee(
             first_name=data["first_name"],
             last_name=data["last_name"],
             department_id=data["department_id"],
             salary=data["salary"],
-            bonus=data.get("bonus"),
+            bonus=bonus,
             hire_date=data["hire_date"]
         )
 
@@ -38,13 +46,21 @@ class EmployeeService:
 
         self._validate_employee_data(data)
 
+        if "bonus" not in data:
+            bonus = data["salary"] * 0.05
+        else:
+            bonus = data["bonus"]
+
+            if bonus is None:
+                bonus = 0
+
         updated = self.repository.update_employee(
             employee_id=employee_id,
             first_name=data["first_name"],
             last_name=data["last_name"],
             department_id=data["department_id"],
             salary=data["salary"],
-            bonus=data.get("bonus"),
+            bonus=bonus,
             hire_date=data["hire_date"]
         )
 

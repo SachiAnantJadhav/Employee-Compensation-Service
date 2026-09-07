@@ -38,7 +38,7 @@ class ReportRepository:
                     Bonus,
                     HireDate
                 FROM Employee
-                WHERE Bonus IS NULL
+                WHERE Bonus IS NULL OR Bonus = 0
                 ORDER BY EmployeeID
             """
 
@@ -79,6 +79,7 @@ class ReportRepository:
                     ROUND((Bonus / Salary) * 100, 2) AS BonusPercentage
                 FROM Employee
                 WHERE Bonus IS NOT NULL
+                  AND Bonus > 0
                   AND Salary > 0
                 ORDER BY EmployeeID
             """
@@ -161,7 +162,10 @@ class ReportRepository:
                     ) AS BonusRank
                 FROM Employee
                 ORDER BY
-                    CASE WHEN Bonus IS NULL THEN 1 ELSE 0 END,
+                    CASE
+                        WHEN Bonus IS NULL OR Bonus = 0 THEN 1
+                        ELSE 0
+                    END,
                     Bonus DESC
             """
 
