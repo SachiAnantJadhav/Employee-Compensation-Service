@@ -94,7 +94,7 @@ FUSION_PRACTICES_ASSIGNMENT/
 
 ---
 
-# 4. Database
+## 4. Database
 
 The database contains two tables:
 
@@ -134,9 +134,9 @@ sql/seed_data.sql
 
 ---
 
-# 5. Setup
+## 5. Setup
 
-## Prerequisites
+### Prerequisites
 
 Install the following:
 
@@ -150,7 +150,7 @@ An Azure subscription with access to Azure Functions and Azure SQL Database is a
 
 ---
 
-## 6. Clone the Repository
+### a. Clone the Repository
 
 ```bash
 git clone https://github.com/SachiAnantJadhav/Employee-Compensation-Service.git
@@ -159,7 +159,7 @@ cd FUSION_PRACTICES_ASSIGNMENT
 
 ---
 
-## 7. Create a Virtual Environment
+### b. Create a Virtual Environment
 
 ### Windows
 
@@ -175,7 +175,7 @@ Activate it:
 
 ---
 
-## 8. Install Dependencies
+### c. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -191,7 +191,7 @@ pytest
 
 ---
 
-# 9. Database Setup
+### d. Database Setup
 
 Create an Azure SQL Database and execute:
 
@@ -211,7 +211,7 @@ to insert the initial department and employee data.
 
 ---
 
-# 10. Configuration
+### e. Configuration
 
 Database credentials and connection strings are **not hardcoded in the source code**.
 
@@ -230,7 +230,7 @@ For local development, create `local.settings.json`:
 
 Replace the placeholder with the appropriate Azure SQL connection string.
 
-### Security
+## 6. Security
 
 `local.settings.json` is included in `.gitignore` and must **not be committed to GitHub**, because it contains sensitive configuration.
 
@@ -238,7 +238,7 @@ For Azure deployment, `DATABASE_CONNECTION_STRING` is configured as an **Applica
 
 ---
 
-# 11. Run Locally
+## 7. Run Locally
 
 Start the Azure Functions host from the project root:
 
@@ -250,9 +250,9 @@ The local APIs will be available through the URLs shown by Azure Functions Core 
 
 ---
 
-# 12. API Endpoints
+## 8. API Endpoints
 
-## Employee APIs
+### Employee APIs
 
 | Method | Endpoint                            | Description                 |
 | ------ | ----------------------------------- | --------------------------- |
@@ -265,7 +265,7 @@ The local APIs will be available through the URLs shown by Azure Functions Core 
 
 ---
 
-## Compensation Reports
+### Compensation Reports
 
 | Method | Endpoint                              | Description                                           |
 | ------ | ------------------------------------- | ----------------------------------------------------- |
@@ -278,9 +278,9 @@ The local APIs will be available through the URLs shown by Azure Functions Core 
 
 ---
 
-# 13. Example API Requests
+## 9. Example API Requests
 
-## Create Employee
+### Create Employee
 
 **POST**
 
@@ -309,7 +309,7 @@ Expected response:
 
 ---
 
-## Get Employee
+### Get Employee
 
 **GET**
 
@@ -333,7 +333,7 @@ Example response:
 
 ---
 
-## Update Employee
+### Update Employee
 
 **PUT**
 
@@ -362,7 +362,7 @@ Expected response:
 
 ---
 
-## Delete Employee
+### Delete Employee
 
 **DELETE**
 
@@ -378,7 +378,7 @@ Expected response:
 
 ---
 
-# 14. Reporting Logic
+## 10. Reporting Logic
 
 ### Total Bonus
 
@@ -436,7 +436,7 @@ with `NULL` bonus treated as zero.
 
 ---
 
-# 15. Important Design Decisions & Assumptions
+## 11. Important Design Decisions & Assumptions
 
 > **These decisions were made where the assignment allowed flexibility or required an assumption.**
 
@@ -503,7 +503,7 @@ Deployed API requests therefore require a valid Azure Function key.
 
 ---
 
-# 16. Error Handling
+## 12. Error Handling
 
 The API uses appropriate HTTP status codes.
 
@@ -520,7 +520,7 @@ Errors are handled at the HTTP function layer so that clients receive an appropr
 
 ---
 
-# 17. Testing
+## 13. Testing
 
 Automated tests are implemented using `pytest`.
 
@@ -540,7 +540,7 @@ Current test result:
 
 ---
 
-# 18. API Testing with Postman
+## 14. API Testing with Postman
 
 The deployed Azure Function endpoints can be tested using Postman.
 
@@ -566,7 +566,7 @@ Recommended testing sequence:
 
 ---
 
-# 19. Azure Deployment
+## 15. Azure Deployment
 
 The application is deployed as an **Azure Function App** running Python.
 
@@ -586,7 +586,7 @@ The database connection string is configured in the Azure Function App's environ
 
 ---
 
-# 20. Repository
+## 16. Repository
 
 Source code and project files:
 
