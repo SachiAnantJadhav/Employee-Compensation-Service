@@ -440,7 +440,7 @@ with `NULL` bonus treated as zero.
 
 > **These decisions were made where the assignment allowed flexibility or required an assumption.**
 
-### 1. Bonus Default Policy
+### a. Bonus Default Policy
 
 A default bonus of **5% of salary** is considered when a bonus is not explicitly provided.
 
@@ -448,7 +448,7 @@ The default is applied at **write time**, so the calculated bonus is stored in t
 
 This keeps compensation values consistent and makes reporting queries straightforward.
 
-### 2. NULL Bonus Handling
+### b. NULL Bonus Handling
 
 A `NULL` bonus represents an employee who has not received a bonus.
 
@@ -460,19 +460,19 @@ For calculations where a numeric bonus is required, `NULL` is treated as:
 
 For the "employees without bonus" report, the original `NULL` value is preserved.
 
-### 3. Database Access
+### c. Database Access
 
 Clients never access Azure SQL directly.
 
 All database operations go through the Azure Functions API.
 
-### 4. SQL Access
+### d. SQL Access
 
 The implementation uses **direct SQL through `mssql-python`**.
 
 No ORM is used.
 
-### 5. Validation
+### e. Validation
 
 The service validates:
 
@@ -485,7 +485,7 @@ The service validates:
 
 Invalid input returns a `400 Bad Request`.
 
-### 6. Not Found Handling
+### f. Not Found Handling
 
 If an employee does not exist:
 
@@ -495,7 +495,7 @@ If an employee does not exist:
 
 is returned.
 
-### 7. Authentication
+### g. Authentication
 
 The Azure Functions use **Function-level HTTP authorization**.
 
