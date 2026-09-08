@@ -331,7 +331,7 @@ For example, if an employee has:
 
 Salary = 1,000,000  
 Bonus = 50,000
-
+```markdown
 and a PATCH request changes only the salary:
 
 ```json
@@ -351,10 +351,14 @@ attributes need to be changed.
 Only the fields included in the request body are updated. Fields omitted
 from the request remain unchanged.
 
+```markdown
 For example:
 
 ```http
 PATCH /api/employees/3
+{
+  "first_name": "Rohit"
+}
 
 ### 4. Explicit null bonus is treated as zero
 
