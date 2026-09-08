@@ -1,144 +1,156 @@
 # Employee Compensation Service
 
-A backend service for managing employee compensation data and generating compensation-related reports.
+This project implements a backend service for managing employee records and generating compensation-related reports. It is built using Azure Functions and Azure SQL, with all data access going through the Functions layer rather than directly from clients.
 
-The service is implemented using **Python Azure Functions** with **Azure SQL Database** as the persistent data store. Clients interact with the system through HTTP APIs and do not access the database directly.
-
----
-
-## 1. Tech Stack
-
-| Technology         | Purpose                                                |
-| ------------------ | ------------------------------------------------------ |
-| Python 3.12        | Application development                                |
-| Azure Functions    | HTTP API / serverless backend                          |
-| Azure SQL Database | Relational database                                    |
-| mssql-python       | Direct SQL database connectivity                       |
-| SQL                | Database schema, CRUD operations and reporting queries |
-| pytest             | Automated testing                                      |
-| Postman            | API testing                                            |
-| Git / GitHub       | Version control and source repository                  |
+The service exposes HTTP APIs for employee CRUD operations and reports such as total bonus, bonus percentage, bonus rankings, and salary analysis.
 
 ---
 
-## 2. Architecture
+## 1. Intro
 
-The application follows a layered structure:
+The goal of the project is to provide a small, production-minded HR backend that:
+
+- stores employee and department data in SQL
+- exposes HTTP endpoints through Azure Functions
+- validates business rules before writing to the database
+- returns readable JSON responses with proper HTTP status codes
+- supports reporting on compensation and salary data
+
+This project is designed to follow a clean layered architecture for maintainability and clarity.
+
+---
+
+## 2. Tech Stack
+
+| Technology                 | Purpose                                 |
+| -------------------------- | --------------------------------------- |
+| Python 3.12                | Backend application development         |
+| Azure Functions            | HTTP-triggered serverless APIs          |
+| Azure SQL Database         | Persistent database                     |
+| mssql-python               | Direct SQL connectivity                 |
+| SQL                        | Schema definition and reporting queries |
+| pytest                     | Automated testing                       |
+| Streamlit                  | Optional frontend UI                    |
+| Postman                    | API testing                             |
+| Azure Functions Core Tools | Local Azure Functions execution         |
+| Git / GitHub               | Version control and repository hosting  |
+
+---
+
+## 3. Architecture
+
+The project follows a layered design:
 
 ```text
-                    Client
-                  /        \
-             Streamlit    Postman
-                  \        /
-                   HTTP API
-                      │
-                      ▼
-              Azure Functions
-                      │
-                      ▼
-               Service Layer
-                      │
-                      ▼
-             Repository Layer
-                      │
-                      ▼
-                mssql-python
-                      │
-                      ▼
-                  Azure SQL
+Client / Postman / Streamlit
+          |
+          v
+Azure Functions (HTTP API)
+          |
+          v
+Service Layer
+          |
+          v
+Repository Layer
+          |
+          v
+mssql-python
+          |
+          v
+Azure SQL Database
 ```
 
 ### Layers
 
-- **Function Layer** – Handles HTTP requests, responses, status codes and error handling.
-- **Service Layer** – Handles validation and application/business logic.
-- **Repository Layer** – Handles SQL queries and database operations.
-- **Database Layer** – Provides the database connection.
-- **Azure SQL Database** – Stores employee and department data.
+- Function Layer: handles HTTP requests, responses, and status codes
+- Service Layer: validates input and applies business rules
+- Repository Layer: runs SQL queries and database operations
+- Database Layer: manages the SQL connection using environment variables
+
+This keeps database access isolated from direct client interaction.
 
 ---
 
-## 3. Project Structure
+## 4. Project Structure
 
 ```text
 FUSION_PRACTICES_ASSIGNMENT/
-│
+├── frontend/
+│   ├── api_client.py
+│   |── app.py
+|   └── .streamlit/
+|       └── secrets.toml
 ├── sql/
 │   ├── create_tables.sql
 │   └── seed_data.sql
-│
 ├── src/
 │   ├── database/
 │   │   └── connection.py
-│   │
-│   ├── models/
-│   │   ├── department.py
-│   │   └── employee.py
-│   │
 │   ├── repositories/
 │   │   ├── employee_repository.py
 │   │   └── report_repository.py
-│   │
 │   └── services/
-│       ├── employee_service.py
-│       └── compensation_service.py
-│
+│       ├── compensation_service.py
+│       └── employee_service.py
 ├── tests/
 │   ├── conftest.py
 │   ├── test_employees.py
 │   └── test_reports.py
-│
 ├── function_app.py
 ├── host.json
 ├── requirements.txt
 ├── .gitignore
 ├── .funcignore
-└── README.md
+├── README.md
+├── test_repository.py
+├── test_service.py
+├── testconn.py
+├── local.settings.json
+
 ```
+
+> Note: `local.settings.json` and `.streamlit/secrets.toml` should not be committed to source control.
 
 ---
 
-## 4. Database
+## 5. Database Structure
 
 The database contains two tables:
 
 ### Department
 
 ```text
-DepartmentID
-DepartmentName
-Location
+DepartmentID      INT           PRIMARY KEY
+DepartmentName    VARCHAR(100)  NOT NULL
+Location          VARCHAR(100)  NULL
 ```
 
 ### Employee
 
 ```text
-EmployeeID
-FirstName
-LastName
-DepartmentID
-Salary
-Bonus
-HireDate
+EmployeeID        INT           PRIMARY KEY
+FirstName         VARCHAR(50)   NOT NULL
+LastName          VARCHAR(50)   NOT NULL
+DepartmentID      INT           FOREIGN KEY -> Department.DepartmentID
+Salary            DECIMAL(12,2) NOT NULL
+Bonus             DECIMAL(12,2) NULL
+HireDate          DATE          NOT NULL
 ```
 
-`Employee.DepartmentID` is a foreign key referencing `Department.DepartmentID`.
-
-The database schema is available in:
+The relationship is:
 
 ```text
-sql/create_tables.sql
+Employee.DepartmentID -> Department.DepartmentID
 ```
 
-Sample data is available in:
+The SQL scripts for schema and seed data are in:
 
-```text
-sql/seed_data.sql
-```
+- `sql/create_tables.sql`
+- `sql/seed_data.sql`
 
 ---
 
-## 5. Setup
+## 6. Setup and Installation
 
 ### Prerequisites
 
@@ -148,78 +160,75 @@ Install the following:
 - Azure Functions Core Tools
 - Azure CLI
 - Git
-- Postman (for API testing)
-
-An Azure subscription with access to Azure Functions and Azure SQL Database is also required for cloud deployment.
+- Postman or another HTTP client
+- Azure SQL Database access
 
 ---
 
-### a. Clone the Repository
+### 6.1 Clone the repository
 
 ```bash
-git clone https://github.com/SachiAnantJadhav/Employee-Compensation-Service.git
-cd FUSION_PRACTICES_ASSIGNMENT
+git clone https://github.com/SachiAnantJadhav/Employee-Compensation-Service
+cd Employee-Compensation-Service
 ```
 
 ---
 
-### b. Create a Virtual Environment
+### 6.2 Create a virtual environment
 
-### Windows
+#### Windows
 
 ```bash
 python -m venv .venv
+.venv\Scripts\activate
 ```
 
-Activate it:
+#### macOS / Linux
 
 ```bash
-.venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 ---
 
-### c. Install Dependencies
+### 6.3 Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-The main dependencies are:
+Typical dependencies include:
 
 ```text
 azure-functions
 mssql-python
 pytest
+requests
+streamlit
 ```
 
 ---
 
-### d. Database Setup
+### 6.4 Set up the database
 
-Create an Azure SQL Database and execute:
+Create your Azure SQL database, then run:
 
 ```bash
 sql/create_tables.sql
 ```
 
-to create the required tables.
-
-Then execute:
+Then load the seed data:
 
 ```bash
 sql/seed_data.sql
 ```
 
-to insert the initial department and employee data.
-
 ---
 
-### e. Configuration
+### 6.5 Create local settings for Azure Functions
 
-Database credentials and connection strings are **not hardcoded in the source code**.
-
-For local development, create `local.settings.json`:
+Create a file named `local.settings.json` in the project root with the following structure:
 
 ```json
 {
@@ -227,373 +236,160 @@ For local development, create `local.settings.json`:
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    "DATABASE_CONNECTION_STRING": "YOUR_DATABASE_CONNECTION_STRING"
+    "DATABASE_CONNECTION_STRING": "Server=tcp:<server-name>.database.windows.net,1433;Initial Catalog=<database-name>;Persist Security Info=False;User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   }
 }
 ```
 
-Replace the placeholder with the appropriate Azure SQL connection string.
-
-## 6. Security
-
-`local.settings.json` is included in `.gitignore` and must **not be committed to GitHub**, because it contains sensitive configuration.
-
-For Azure deployment, `DATABASE_CONNECTION_STRING` is configured as an **Application Setting / Environment Variable** in the Azure Function App.
+This file contains secrets and must be kept local.
 
 ---
 
-## 7. Run Locally
+### 6.6 Create Streamlit secrets file
 
-Start the Azure Functions host from the project root:
+For the local frontend, create a `.streamlit/secrets.toml` file with this structure:
+
+```toml
+API_BASE_URL = "http://localhost:7071"
+FUNCTION_KEY = "your_local_function_key_here"
+```
+
+If you are using the deployed app, the values can be replaced with the deployed API URL and function key instead.
+
+> `FUNCTION_KEY` is required only when the Azure Function app is configured with function-level authorization.
+
+---
+
+### 6.7 Run Azure Functions locally
+
+From the project root:
 
 ```bash
 func start
 ```
 
-The local APIs will be available through the URLs shown by Azure Functions Core Tools.
+This starts the Azure Functions host and exposes the local endpoints.
 
 ---
 
-## 8. API Endpoints
+### 6.8 Run the Streamlit frontend locally (optional)
+
+```bash
+streamlit run frontend/app.py
+```
+
+---
+
+## 7. Local Endpoints
+
+The following endpoints are exposed by the Azure Function app.
 
 ### Employee APIs
 
-| Method | Endpoint                            | Description                 |
-| ------ | ----------------------------------- | --------------------------- |
-| POST   | `/api/employees`                    | Create an employee          |
-| GET    | `/api/employees/{employee_id}`      | Get an employee by ID       |
-| GET    | `/api/employees`                    | Get all employees           |
-| GET    | `/api/employees?department_id={id}` | Get employees by department |
-| PUT    | `/api/employees/{employee_id}`      | Update an employee          |
-| DELETE | `/api/employees/{employee_id}`      | Delete an employee          |
-
----
+| Method | Endpoint                            | Description                   |
+| ------ | ----------------------------------- | ----------------------------- |
+| POST   | `/api/employees`                    | Create a new employee         |
+| GET    | `/api/employees/{employee_id}`      | Get one employee by ID        |
+| GET    | `/api/employees`                    | Get all employees             |
+| GET    | `/api/employees?department_id={id}` | Get employees by department   |
+| PUT    | `/api/employees/{employee_id}`      | Full update of an employee    |
+| PATCH  | `/api/employees/{employee_id}`      | Partial update of an employee |
+| DELETE | `/api/employees/{employee_id}`      | Delete an employee            |
 
 ### Compensation Reports
 
-| Method | Endpoint                              | Description                                           |
-| ------ | ------------------------------------- | ----------------------------------------------------- |
-| GET    | `/api/reports/total-bonus`            | Total bonus paid across employees                     |
-| GET    | `/api/reports/no-bonus`               | Employees who have never received a bonus             |
-| GET    | `/api/reports/bonus-percentage`       | Bonus as a percentage of salary                       |
-| GET    | `/api/reports/high-bonus-departments` | Departments where total bonus exceeds average salary  |
-| GET    | `/api/reports/bonus-ranking`          | Employees ranked by bonus                             |
-| GET    | `/api/reports/highest-salary`         | Highest base salary and total compensation comparison |
+| Method | Endpoint                              | Description                                          |
+| ------ | ------------------------------------- | ---------------------------------------------------- |
+| GET    | `/api/reports/total-bonus`            | Total bonus paid across company                      |
+| GET    | `/api/reports/no-bonus`               | Employees with no bonus                              |
+| GET    | `/api/reports/bonus-percentage`       | Bonus as a percentage of salary                      |
+| GET    | `/api/reports/high-bonus-departments` | Departments whose total bonus exceeds average salary |
+| GET    | `/api/reports/bonus-ranking`          | Employees ranked by bonus                            |
+| GET    | `/api/reports/highest-salary`         | Highest salary employee and compensation comparison  |
 
 ---
 
-## 9. Example API Requests
+## 8. Assumptions and Design Decisions
 
-### Create Employee
+The assignment leaves some details open, so the following assumptions were made to keep behavior consistent and explicit.
 
-**POST**
+### 1. Default bonus is applied at write time
 
-```text
-/api/employees
-```
+A default bonus equal to 5% of salary is applied when a bonus is not provided during create/update.
 
-Request body:
+Example:
 
 ```json
 {
-  "first_name": "John",
-  "last_name": "Doe",
-  "department_id": 1,
-  "salary": 800000,
-  "bonus": 50000,
-  "hire_date": "2026-09-07"
+  "salary": 1000000
 }
 ```
 
-Expected response:
+If no bonus is provided, the system stores:
 
 ```text
-201 Created
+bonus = 1000000 * 0.05 = 50000
 ```
 
----
+This is done when the employee is written to the database, not when reading it.
 
-### Get Employee
+### 2. PUT is a full update
 
-**GET**
+`PUT /api/employees/{employee_id}` is treated as a full employee update. The request should include all required employee fields.
 
-```text
-/api/employees/1
-```
+### 3. PATCH is used for partial updates
 
-Example response:
+Partial updates are allowed through a patch-style flow, where omitted fields are treated as unchanged.
+
+### 4. Explicit null bonus is treated as zero
+
+If the client sends:
 
 ```json
 {
-  "employee_id": 1,
-  "first_name": "Aarav",
-  "last_name": "Sharma",
-  "department_id": 1,
-  "salary": 1200000.0,
-  "bonus": 150000.0,
-  "hire_date": "2022-01-10"
+  "bonus": null
 }
 ```
 
----
+it is interpreted as `0` for business logic purposes.
 
-### Update Employee
+### 5. NULL and zero are treated as no bonus in reports
 
-**PUT**
+For reporting, both `NULL` and `0` are treated as no bonus.
 
-```text
-/api/employees/1
-```
+### 6. Total bonus uses `NULL` as zero
 
-Request body:
-
-```json
-{
-  "first_name": "Aarav",
-  "last_name": "Sharma",
-  "department_id": 1,
-  "salary": 1250000,
-  "bonus": 175000,
-  "hire_date": "2022-01-10"
-}
-```
-
-Expected response:
-
-```text
-200 OK
-```
+The total company bonus report uses `COALESCE` logic so that `NULL` bonuses do not break the calculation.
 
 ---
 
-### Delete Employee
+## 9. Azure and Deployment
 
-**DELETE**
+This project is designed to run as an Azure Function App.
 
-```text
-/api/employees/1
-```
+The deployed version is available here:
 
-Expected response:
+https://employee-compensation-service-deployed.streamlit.app/
 
-```text
-204 No Content
-```
+For Azure deployment, secrets and database connection details are stored as application settings rather than being hardcoded in the source code.
 
 ---
 
-## 10. Reporting Logic
+## 10. Notes
 
-### Total Bonus
-
-Calculates the total bonus across all employees.
-
-`NULL` bonuses are treated as zero.
-
-### Employees Without Bonus
-
-Returns employees where:
-
-```sql
-Bonus IS NULL
-```
-
-### Bonus Percentage
-
-Calculates:
-
-```text
-Bonus / Salary × 100
-```
-
-and rounds the result to two decimal places.
-
-Employees with `NULL` bonuses are excluded from this report.
-
-### High-Bonus Departments
-
-Returns departments where:
-
-```text
-Total Department Bonus > Average Department Salary
-```
-
-`NULL` bonuses are treated as zero.
-
-### Bonus Ranking
-
-Employees are ranked based on bonus in descending order.
-
-Employees with `NULL` bonuses appear last.
-
-### Highest Salary
-
-Returns the employee with the highest base salary and also determines whether that employee has the highest total compensation.
-
-Total compensation is calculated as:
-
-```text
-Salary + Bonus
-```
-
-with `NULL` bonus treated as zero.
+- Clients do not access the SQL database directly.
+- All reads and writes go through Azure Functions endpoints.
+- Local secret files are intentionally excluded from source control.
+- The project is structured to be easy to test and extend.
 
 ---
 
-## 11. Important Design Decisions & Assumptions
+## 11. Testing
 
-> **These decisions were made where the assignment allowed flexibility or required an assumption.**
-
-### a. Bonus Default Policy
-
-A default bonus of **5% of salary** is considered when a bonus is not explicitly provided.
-
-The default is applied at **write time**, so the calculated bonus is stored in the `Bonus` column.
-
-This keeps compensation values consistent and makes reporting queries straightforward.
-
-### b. NULL Bonus Handling
-
-A `NULL` bonus represents an employee who has not received a bonus.
-
-For calculations where a numeric bonus is required, `NULL` is treated as:
-
-```text
-0
-```
-
-For the "employees without bonus" report, the original `NULL` value is preserved.
-
-### c. Database Access
-
-Clients never access Azure SQL directly.
-
-All database operations go through the Azure Functions API.
-
-### d. SQL Access
-
-The implementation uses **direct SQL through `mssql-python`**.
-
-No ORM is used.
-
-### e. Validation
-
-The service validates:
-
-- Required employee fields
-- First and last name types and lengths
-- Positive department IDs
-- Numeric salary and bonus values
-- Non-negative salary and bonus values
-- Positive employee IDs
-
-Invalid input returns a `400 Bad Request`.
-
-### f. Not Found Handling
-
-If an employee does not exist:
-
-```text
-404 Not Found
-```
-
-is returned.
-
-### g. Authentication
-
-The Azure Functions use **Function-level HTTP authorization**.
-
-Deployed API requests therefore require a valid Azure Function key.
-
----
-
-## 12. Error Handling
-
-The API uses appropriate HTTP status codes.
-
-| Status | Meaning                             |
-| ------ | ----------------------------------- |
-| 200    | Successful request                  |
-| 201    | Employee successfully created       |
-| 204    | Employee successfully deleted       |
-| 400    | Invalid request or validation error |
-| 404    | Employee not found                  |
-| 500    | Unexpected server/database error    |
-
-Errors are handled at the HTTP function layer so that clients receive an appropriate response instead of an unhandled exception.
-
----
-
-## 13. Testing
-
-Automated tests are implemented using `pytest`.
-
-Run:
+Run the test suite with:
 
 ```bash
 pytest
 ```
 
-The test suite covers employee validation and compensation reports.
-
-Current test result:
-
-```text
-10 passed
-```
-
----
-
-## 14. API Testing with Postman
-
-The deployed Azure Function endpoints can be tested using Postman.
-
-For the deployed Function App, use the Azure-provided function URL and include the required function key.
-
-Recommended testing sequence:
-
-```text
-1. Create employee
-2. Get employee
-3. List employees
-4. Filter employees by department
-5. Update employee
-6. Delete employee
-
-7. Total bonus
-8. Employees without bonus
-9. Bonus percentage
-10. High-bonus departments
-11. Bonus ranking
-12. Highest salary
-```
-
----
-
-## 15. Azure Deployment
-
-The application is deployed as an **Azure Function App** running Python.
-
-Deployment from the project root is performed using:
-
-```bash
-az login
-```
-
-followed by:
-
-```bash
-func azure functionapp publish employee-compensation-service
-```
-
-The database connection string is configured in the Azure Function App's environment variables rather than being included in the source code.
-
----
-
-## 16. Repository
-
-Source code and project files:
-
-**GitHub:**
-
-https://github.com/SachiAnantJadhav/FUSION_PRACTICES_ASSIGNMENT
+This validates employee validation rules and the report logic.

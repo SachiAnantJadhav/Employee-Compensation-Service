@@ -2,3 +2,5 @@ azure-functions
 mssql-python
 pydantic
 pytest
+streamlit
+requests
