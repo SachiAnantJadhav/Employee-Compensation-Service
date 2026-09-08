@@ -102,9 +102,6 @@ FUSION_PRACTICES_ASSIGNMENT/
 ├── .gitignore
 ├── .funcignore
 ├── README.md
-├── test_repository.py
-├── test_service.py
-├── testconn.py
 ├── local.settings.json
 
 ```
