@@ -74,12 +74,12 @@ This keeps database access isolated from direct client interaction.
 ## 4. Project Structure
 
 ```text
-FUSION_PRACTICES_ASSIGNMENT/
+Employee-Compensation-Service/
 ├── frontend/
 │   ├── api_client.py
-│   |── app.py
-|   └── .streamlit/
-|       └── secrets.toml
+│   ├── app.py
+│   └── .streamlit/
+│       └── secrets.toml
 ├── sql/
 │   ├── create_tables.sql
 │   └── seed_data.sql
@@ -99,10 +99,10 @@ FUSION_PRACTICES_ASSIGNMENT/
 ├── function_app.py
 ├── host.json
 ├── requirements.txt
+├── pytest.ini
 ├── .gitignore
 ├── .funcignore
-├── README.md
-├── local.settings.json
+└── README.md
 
 ```
 
@@ -312,23 +312,32 @@ The assignment leaves some details open, so the following assumptions were made 
 
 ### 1. Default bonus is applied at write time
 
-A default bonus equal to 5% of salary is applied when a bonus is not provided during create/update.
+The optional 5% default bonus is implemented at write time.
 
-Example:
+The behavior differs depending on the operation:
+
+| Operation | Bonus behavior |
+|-----------|-----------------|
+| Create + bonus omitted | 5% of salary is calculated and stored |
+| Create + bonus provided | Provided bonus is stored |
+| Create + bonus = 0 | 0 is stored |
+| Create + bonus = null | 0 is stored |
+| PUT + bonus omitted | 5% of the new salary is calculated and stored |
+| PATCH + bonus omitted | Existing bonus remains unchanged |
+| PATCH + bonus provided | Provided bonus is stored |
+| PATCH + bonus = null | Bonus is set to 0 |
+
+For example, if an employee has:
+
+Salary = 1,000,000  
+Bonus = 50,000
+
+and a PATCH request changes only the salary:
 
 ```json
 {
-  "salary": 1000000
+  "salary": 1200000
 }
-```
-
-If no bonus is provided, the system stores:
-
-```text
-bonus = 1000000 * 0.05 = 50000
-```
-
-This is done when the employee is written to the database, not when reading it.
 
 ### 2. PUT is a full update
 
@@ -336,7 +345,16 @@ This is done when the employee is written to the database, not when reading it.
 
 ### 3. PATCH is used for partial updates
 
-Partial updates are allowed through a patch-style flow, where omitted fields are treated as unchanged.
+`PATCH /api/employees/{employee_id}` is used when only specific employee
+attributes need to be changed.
+
+Only the fields included in the request body are updated. Fields omitted
+from the request remain unchanged.
+
+For example:
+
+```http
+PATCH /api/employees/3
 
 ### 4. Explicit null bonus is treated as zero
 
@@ -358,13 +376,29 @@ For reporting, both `NULL` and `0` are treated as no bonus.
 
 The total company bonus report uses `COALESCE` logic so that `NULL` bonuses do not break the calculation.
 
+### 7. Function-level authorization
+
+The Azure Function App uses function-level HTTP authorization.
+
+Deployed API requests therefore require a valid Function key.
+
+The key is supplied through the `x-functions-key` HTTP header and is stored
+in secret configuration rather than source code.
+
+Local development may use the same authorization configuration depending on
+the local Functions host setup.
 ---
 
 ## 9. Azure and Deployment
 
-This project is designed to run as an Azure Function App.
+The backend is deployed as an Azure Function App.
 
-The deployed version is available here:
+The deployed backend base URL is:
+
+`https://employee-compensation-service-bqbygyh9hyhjgzak.centralindia-01.azurewebsites.net`
+
+The Streamlit frontend is deployed separately and communicates with the
+Azure Function API over HTTPS.
 
 https://employee-compensation-service-deployed.streamlit.app/
 
